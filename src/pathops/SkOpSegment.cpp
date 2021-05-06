@@ -166,16 +166,26 @@ bool SkOpSegment::activeWinding(SkOpSpanBase* start, SkOpSpanBase* end, int* sum
 bool SkOpSegment::addCurveTo(const SkOpSpanBase* start, const SkOpSpanBase* end,
         SkPathWriter* path) const {
     const SkOpSpan* spanStart = start->starter(end);
-    FAIL_IF(spanStart->alreadyAdded());
+    bool alreadyAdded = spanStart->alreadyAdded();
+    if (alreadyAdded) {
+        SkDebugf("spanStart->alreadyAdded()\n");
+        return true;
+    }
+    // FAIL_IF(alreadyAdded);
     const_cast<SkOpSpan*>(spanStart)->markAdded();
     SkDCurveSweep curvePart;
     start->segment()->subDivide(start, end, &curvePart.fCurve);
     curvePart.setCurveHullSweep(fVerb);
     SkPath::Verb verb = curvePart.isCurve() ? fVerb : SkPath::kLine_Verb;
     path->deferredMove(start->ptT());
+    bool deferredLineOk = false;
     switch (verb) {
         case SkPath::kLine_Verb:
-            FAIL_IF(!path->deferredLine(end->ptT()));
+            deferredLineOk = path->deferredLine(end->ptT());
+            if (!deferredLineOk) {
+                SkDebugf("path->deferredLine(end->ptT()) failed\n");
+            }
+            FAIL_IF(!deferredLineOk);
             break;
         case SkPath::kQuad_Verb:
             path->quadTo(curvePart.fCurve.fQuad[1].asSkPoint(), end->ptT());

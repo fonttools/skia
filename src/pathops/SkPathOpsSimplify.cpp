@@ -35,12 +35,13 @@ static bool bridgeWinding(SkOpContourHead* contourList, SkPathWriter* writer) {
                     if (!next) {
                         break;
                     }
-        #if DEBUG_FLOW
+        // #if DEBUG_FLOW
             SkDebugf("%s current id=%d from=(%1.9g,%1.9g) to=(%1.9g,%1.9g)\n", __FUNCTION__,
                     current->debugID(), start->pt().fX, start->pt().fY,
                     end->pt().fX, end->pt().fY);
-        #endif
+        // #endif
                     if (!current->addCurveTo(start, end, writer)) {
+                        SkDebugf("SkOpSegment->addCurveTo(start, end, writer) failed\n");
                         return false;
                     }
                     current = next;
@@ -66,13 +67,13 @@ static bool bridgeWinding(SkOpContourHead* contourList, SkPathWriter* writer) {
                     last->setChased(true);
                     SkASSERT(!SkPathOpsDebug::ChaseContains(chase, last));
                     *chase.append() = last;
-#if DEBUG_WINDING
+// #if DEBUG_WINDING
                     SkDebugf("%s chase.append id=%d", __FUNCTION__, last->segment()->debugID());
                     if (!last->final()) {
                          SkDebugf(" windSum=%d", last->upCast()->windSum());
                     }
                     SkDebugf("\n");
-#endif
+// #endif
                 }
             }
             current = FindChase(&chase, &start, &end);
@@ -169,6 +170,7 @@ bool SimplifyDebug(const SkPath& path, SkPath* result
 #endif
     SkOpEdgeBuilder builder(path, contourList, &globalState);
     if (!builder.finish()) {
+        SkDebugf("SkOpEdgeBuilder.finish() failed\n");
         return false;
     }
 #if DEBUG_DUMP_SEGMENTS
@@ -194,6 +196,7 @@ bool SimplifyDebug(const SkPath& path, SkPath* result
     globalState.debugAddToGlobalCoinDicts();
 #endif
     if (!success) {
+        SkDebugf("HandleCoincidence failed\n");
         return false;
     }
 #if DEBUG_DUMP_ALIGNMENT
@@ -205,6 +208,11 @@ bool SimplifyDebug(const SkPath& path, SkPath* result
     SkPathWriter wrapper(*result);
     if (builder.xorMask() == kWinding_PathOpsMask ? !bridgeWinding(contourList, &wrapper)
             : !bridgeXor(contourList, &wrapper)) {
+        if (builder.xorMask() == kWinding_PathOpsMask) {
+            SkDebugf("bridgeWinding failed\n");
+        } else {
+            SkDebugf("bridgeXor failed\n");
+        }
         return false;
     }
     wrapper.assemble();  // if some edges could not be resolved, assemble remaining
