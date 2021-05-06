@@ -169,9 +169,8 @@ bool SkOpSegment::addCurveTo(const SkOpSpanBase* start, const SkOpSpanBase* end,
     bool alreadyAdded = spanStart->alreadyAdded();
     if (alreadyAdded) {
         SkDebugf("spanStart->alreadyAdded()\n");
-        return true;
     }
-    // FAIL_IF(alreadyAdded);
+    FAIL_IF(alreadyAdded);
     const_cast<SkOpSpan*>(spanStart)->markAdded();
     SkDCurveSweep curvePart;
     start->segment()->subDivide(start, end, &curvePart.fCurve);
