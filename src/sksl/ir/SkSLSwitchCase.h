@@ -12,12 +12,7 @@
 #include "include/private/SkSLString.h"
 #include "src/sksl/ir/SkSLExpression.h"
 
-// Make sure that the PRI format string macros are defined
-#ifndef __STDC_FORMAT_MACROS
-#define __STDC_FORMAT_MACROS
-#endif
-
-#include <inttypes.h>
+#include <cinttypes>
 
 namespace SkSL {
 
